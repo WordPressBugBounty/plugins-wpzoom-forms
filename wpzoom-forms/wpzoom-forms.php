@@ -13,7 +13,7 @@
  * Description: Simple, user-friendly contact form plugin for WordPress that utilizes Gutenberg blocks for easy form building and customization.
  * Author:      WPZOOM
  * Author URI:  https://www.wpzoom.com
- * Version:     1.2.4
+ * Version:     1.2.5
  * License:     GPL2+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  */
@@ -477,7 +477,82 @@ class WPZOOM_Forms {
 					'align' => array(
 						'type'    => 'string',
 						'default' => 'none'
-					)
+					),
+					'formBgColor' => array(
+						'type'    => 'string',
+						'default' => ''
+					),
+					'formBrd' => array(
+						'type'    => 'string',
+						'default' => ''
+					),
+					
+					'fieldBrdStyle' => array(
+						'type'    => 'string',
+						'default' => 'default'
+					),
+					'fieldBrdWidth' => array(
+						'type'    => 'number',
+						'default' => 0
+					),
+					'fieldBrdRadius' => array(
+						'type'    => 'number',
+						'default' => 0
+					),
+
+					'fieldBrdColor' => array(
+						'type'    => 'string',
+						'default' => ''
+					),
+					'fieldTextColor' => array(
+						'type'    => 'string',
+						'default' => ''
+					),
+					'fieldBgColor' => array(
+						'type'    => 'string',
+						'default' => ''
+					),
+					'labelTextColor' => array(
+						'type'    => 'string',
+						'default' => ''
+					),
+					'btnBgColor' => array(
+						'type'    => 'string',
+						'default' => ''
+					),
+					'btnTextColor' => array(
+						'type'    => 'string',
+						'default' => ''
+					),
+					'btnBrdWidth' => array(
+						'type'    => 'number',
+						'default' => 0
+					),
+					'btnBrdStyle' => array(
+						'type'    => 'string',
+						'default' => 'default'
+					),
+					'btnBrdRadius' => array(
+						'type'    => 'number',
+						'default' => 0
+					),
+					'btnBrdColor' => array(
+						'type'    => 'string',
+						'default' => ''
+					),
+					'btnHoverBgColor' => array(
+						'type'    => 'string',
+						'default' => ''
+					),
+					'btnHoverTextColor' => array(
+						'type'    => 'string',
+						'default' => ''
+					),
+					'btnHoverBrdColor' => array(
+						'type'    => 'string',
+						'default' => ''
+					),
+
 				),
 				'script'          => 'wpzoom-forms-js-frontend-formblock',
 				'style'           => 'wpzoom-forms-css-frontend-formblock',
@@ -1400,6 +1475,24 @@ class WPZOOM_Forms {
 
 		$align = isset( $attributes['align'] ) && ! empty( $attributes['align'] ) ? $attributes['align'] : 'none';
 
+		//Get styles from the block
+
+		$fieldBgColor   = isset( $attributes['fieldBgColor'] ) ? $attributes['fieldBgColor'] : '';
+		$fieldBrdStyle  = isset( $attributes['fieldBrdStyle'] ) ? $attributes['fieldBrdStyle'] : '';
+		$fieldBrdWidth  = isset( $attributes['fieldBrdWidth'] ) ? $attributes['fieldBrdWidth'] . 'px' : '';
+		$fieldBrdRadius = isset( $attributes['fieldBrdRadius'] ) ? $attributes['fieldBrdRadius'] . 'px' : '';
+		$fieldBrdColor  = isset( $attributes['fieldBrdColor'] ) ? $attributes['fieldBrdColor'] : '';
+		$fieldTextColor = isset( $attributes['fieldTextColor'] ) ? $attributes['fieldTextColor'] : '';
+		$labelTextColor = isset( $attributes['labelTextColor'] ) ? $attributes['labelTextColor'] : '';
+		$btnBrdRadius   = isset( $attributes['btnBrdRadius'] ) ? $attributes['btnBrdRadius'] . 'px' : '';
+		$btnBrdStyle    = isset( $attributes['btnBrdStyle'] ) ? $attributes['btnBrdStyle'] : '';
+		$btnTextColor   = isset( $attributes['btnTextColor'] ) ? $attributes['btnTextColor'] : '';
+		$btnBrdWidth    = isset( $attributes['btnBrdWidth'] ) ? $attributes['btnBrdWidth']. 'px' : '';
+		$btnBrdColor    = isset( $attributes['btnBrdColor'] ) ? $attributes['btnBrdColor'] : '';
+		$btnBgColor     = isset( $attributes['btnBgColor'] ) ? $attributes['btnBgColor'] : '';
+
+		$form_ID = 'wpzf-' . intval( $attributes['formId'] );
+
 		$content = sprintf(
 			'<!-- ZOOM Forms Start -->
 			<form id="wpzf-%2$s" method="post" action="%1$s" class="wpzoom-forms_form%6$s">
@@ -1443,14 +1536,69 @@ class WPZOOM_Forms {
 		$recaptcha_v2_site_key	= esc_attr( sanitize_text_field( WPZOOM_Forms_Settings::get( 'wpzf_global_captcha_site_key' ) ) );
 		$recaptcha_v3_site_key	= esc_attr( sanitize_text_field( WPZOOM_Forms_Settings::get( 'wpzf_global_captcha_site_key_v3' ) ) );
 		$turnstile_site_key		= esc_attr( sanitize_text_field( WPZOOM_Forms_Settings::get( 'wpzf_global_turnstile_site_key' ) ) );
+		$turnstile_widget_theme = esc_attr( sanitize_text_field( WPZOOM_Forms_Settings::get( 'wpzf_global_turnstile_widget_theme' ) ) ); 
 
 		if( 'recaptcha' == $captchaMethod ) {
 			$recaptcha_site_key = ( 'v3' == $recaptchaType && !empty($recaptcha_v3_site_key) ) ? $recaptcha_v3_site_key : $recaptcha_v2_site_key;
 			$content = preg_replace( '/<input([^>]*)type="submit"([^>]*)class="([^"]+)"/i', '<input $1 type="submit" data-sitekey="' . $recaptcha_site_key . '" data-callback="wpzf_submit" data-action="submit" $2 class="$3 g-recaptcha"', $content );
 		} elseif ( 'turnstile' == $captchaMethod ) {
-			$turnstile_widget = '<div class="cf-turnstile" data-sitekey="' . $turnstile_site_key . '"></div>';
+			$turnstile_widget = '<div class="cf-turnstile" data-theme="' . $turnstile_widget_theme . '" data-sitekey="' . $turnstile_site_key . '"></div>';
 			$content = preg_replace( '/<input([^>]*)type="submit"([^>]*)class="([^"]+)".*>/i', '<input $1 type="submit" data-callback="wpzf_submit" data-action="submit" $2 class="$3 cf-captcha">' . $turnstile_widget, $content );
 		}
+
+		$style = $styleOutput = '';
+
+		// Add custom styles to the form
+		if( ! empty( $fieldBgColor ) ) {
+			$styleOutput .= sprintf( '#' . $form_ID . ' input:not([type="submit"]), #' . $form_ID . ' textarea { background-color: %s; }', $fieldBgColor );
+		}
+		if( ! empty( $fieldBrdStyle ) && 'default' !== $fieldBrdStyle ) {
+			$styleOutput .= sprintf( '#' . $form_ID . ' input:not([type="submit"]), #' . $form_ID . ' textarea { border-style: %s; }', $fieldBrdStyle );
+			if( ! empty( $fieldBrdWidth ) ) {
+				$styleOutput .= sprintf( '#' . $form_ID . ' input:not([type="submit"]), #' . $form_ID . ' textarea { border-width: %s; }', $fieldBrdWidth );
+			}
+			if( ! empty( $fieldBrdRadius ) ) {
+				$styleOutput .= sprintf( '#' . $form_ID . ' input:not([type="submit"]), #' . $form_ID . ' textarea { border-radius: %s; }', $fieldBrdRadius );
+			}
+		}
+
+		if( ! empty( $fieldBrdColor ) ) {
+			$styleOutput .= sprintf( '#' . $form_ID . ' input:not([type="submit"]), #' . $form_ID . ' textarea { border-color: %s; }', $fieldBrdColor );
+		}
+		if( ! empty( $fieldTextColor ) ) {
+			$styleOutput .= sprintf( '#' . $form_ID . ' input:not([type="submit"]), #' . $form_ID . ' textarea { color: %s; }', $fieldTextColor );
+		}
+		
+		//Label styles
+		if( ! empty( $labelTextColor ) ) {
+			$styleOutput .= sprintf( '#' . $form_ID . ' label { color: %s; }', $labelTextColor );
+		}
+		
+		//Button styles
+		if( ! empty( $btnBrdStyle ) && 'default' !== $btnBrdStyle ) {
+			$styleOutput .= sprintf( '#' . $form_ID . ' input[type="submit"] { border-style: %s; }', $btnBrdStyle );
+			if( ! empty( $btnBrdWidth ) ) {
+				$styleOutput .= sprintf( '#' . $form_ID . ' input[type="submit"] { border-width: %s; }', $btnBrdWidth );
+			}
+			if( ! empty( $btnBrdRadius ) ) {
+				$styleOutput .= sprintf( '#' . $form_ID . ' input[type="submit"] { border-radius: %s; }', $btnBrdRadius );
+			}
+		}
+		if( ! empty( $btnTextColor ) ) {
+			$styleOutput .= sprintf( '#' . $form_ID . ' input[type="submit"] { color: %s; }', $btnTextColor );
+		}
+		if( ! empty( $btnBrdColor ) ) {
+			$styleOutput .= sprintf( '#' . $form_ID . ' input[type="submit"] { border-color: %s; }', $btnBrdColor );
+		}
+		if( ! empty( $btnBgColor ) ) {
+			$styleOutput .= sprintf( '#' . $form_ID . ' input[type="submit"] { background-color: %s; }', $btnBgColor );
+		}
+
+		$style = sprintf( '<style>%s</style>',
+			$styleOutput
+		);
+
+		$content = $style . $content;
 
 		return $content;
 	}

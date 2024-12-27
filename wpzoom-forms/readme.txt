@@ -5,7 +5,7 @@ Author URI:        https://www.wpzoom.com/
 Requires at least: 6.0
 Requires PHP:      7.4
 Tested up to:      6.7
-Stable tag:        1.2.4
+Stable tag:        1.2.5
 License:           GNU General Public License v2
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 Tags:              contact, form, contact form, form builder, custom form
@@ -28,7 +28,7 @@ WPZOOM Forms is a flexible and intuitive contact form plugin for WordPress that 
 * Display your form anywhere using built-in contact form **shortcodes** or **contact form block**
 * **Pre-built templates**: Choose from a variety of pre-designed form templates to get started quickly.
 * **Date Picker** field to create advanced forms like **booking** or **reservations**
-* **Save Submissions to the Database**: you can collect submissions using your forms and have them all saved in the Dashboard of yoru website. This helps to find quickly all messages left by your users.
+* **Save Submissions to the Database**: you can collect submissions using your forms and have them all saved in the Dashboard of your website. This helps to find quickly all messages left by your users.
 
 
 = Coming Soon =
@@ -76,6 +76,11 @@ To export form submissions, navigate to the Tools > Export page in Dashboard and
 
 
 == Changelog ==
+
+= 1.2.5 =
+* Added new styling options to the block used to embed a form
+* Added new styling options to the Elementor widget
+* Added Dark mode support for Cloudflare Turnstile
 
 = 1.2.4 =
 * Minor bug fix
