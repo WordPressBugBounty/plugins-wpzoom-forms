@@ -13,7 +13,7 @@
  * Description: Simple, user-friendly contact form plugin for WordPress that utilizes Gutenberg blocks for easy form building and customization.
  * Author:      WPZOOM
  * Author URI:  https://www.wpzoom.com
- * Version:     1.2.10
+ * Version:     1.3.0
  * License:     GPL2+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  */
@@ -110,6 +110,13 @@ class WPZOOM_Forms {
 	public $dist_dir_url;
 
 	/**
+	 * UTM source for header and footer links.
+	 *
+	 * @var string
+	 */
+	public $utm_source = '?utm_source=wpadmin&utm_medium=wpzoom-forms-free&utm_campaign=header-footer-links';
+
+	/**
 	 * Initializes the plugin and sets up needed hooks and features.
 	 *
 	 * @access public
@@ -126,6 +133,18 @@ class WPZOOM_Forms {
 			$this->dist_dir_url    = trailingslashit( $this->plugin_dir_url . 'dist' );
 
 			load_plugin_textdomain( 'wpzoom-forms', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+
+			// Register welcome guide setting
+			register_setting(
+				'general',
+				'wpzoom_forms_welcome_guide_shown',
+				array(
+					'type' => 'boolean',
+					'default' => false,
+					'show_in_rest' => true,
+					'sanitize_callback' => 'rest_sanitize_boolean',
+				)
+			);
 
 			add_filter( 'allowed_block_types_all',                      array( $this, 'filter_allowed_block_types' ),        10, 2 );
 			add_filter( 'block_categories_all',                         array( $this, 'filter_block_categories' ),           10, 2 );
@@ -709,6 +728,15 @@ class WPZOOM_Forms {
 			array( $this, 'render_settings_page' )
 		);
 
+		add_submenu_page(
+			'edit.php?post_type=wpzf-form',
+			$page_title,
+            '<span style="color:#3496fe; font-weight: 600;">' . esc_html__( 'UPGRADE', 'wpzoom-forms' ) . ' &rarr; <span class="wpz-premium-badge" style="background-color: #3496fe; color: #fff; margin-left: 3px; font-size: 11px; min-height: 16px;  border-radius: 8px; display: inline-block; font-weight: 600; line-height: 1.6; padding: 0 8px">PRO</span></span>',
+			'manage_options',
+			'wpzf-upsell',
+			array( $this, 'render_upsell_page' )
+		);
+
 	}
 
 	/**
@@ -732,7 +760,7 @@ class WPZOOM_Forms {
 
 		$current_page = get_current_screen()->id;
 
-		if ( 'edit-wpzf-form' == $current_page || 'wpzf-form' == $current_page || 'edit-wpzf-submission' == $current_page || 'wpzf-submission' == $current_page || 'wpzf-form_page_wpzf-settings' == $current_page ) {
+		if ( 'edit-wpzf-form' == $current_page || 'wpzf-form' == $current_page || 'edit-wpzf-submission' == $current_page || 'wpzf-submission' == $current_page || 'wpzf-form_page_wpzf-settings' == $current_page || 'wpzf-form_page_wpzoom-forms-pro-license' == $current_page || 'wpzf-form_page_wpzf-upsell' == $current_page ) {
 			wp_enqueue_style(
 				'wpzoom-forms-css-backend-main',
 				trailingslashit( $this->main_dir_url ) . 'main/backend/style.css',
@@ -1433,7 +1461,7 @@ class WPZOOM_Forms {
 			echo '<li class="top"><h3>' . sprintf( __( 'Form: %s', 'wpzoom-forms' ), $form_name ) . '</h3></li>';
 
 			foreach ( $fields as $name => $value ) {
-				echo '<li><h3>' . esc_html( $name ) . '</h3><div>' . make_clickable( apply_filters( 'the_content', esc_html( $value ) ) ) . '</div></li>';
+				echo '<li><h3>' . esc_html( $name ) . '</h3><div>' . make_clickable( nl2br( esc_html( $value ) ) ) . '</div></li>';
 			}
 
 			echo '</ul>';
@@ -1498,6 +1526,59 @@ class WPZOOM_Forms {
 		$current_screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 
 		if ( is_admin() || ( ! is_null( $current_screen ) && $current_screen->is_block_editor() ) ) return '';
+
+		// Get form ID and validate form exists and is published
+		$form_id = isset( $attributes['formId'] ) ? intval( $attributes['formId'] ) : 0;
+		$form_post = get_post( $form_id );
+
+		// Check if form exists and is published
+		if ( ! $form_post || 'wpzf-form' !== $form_post->post_type || 'publish' !== $form_post->post_status ) {
+			// Show message only to administrators
+			if ( current_user_can( 'manage_options' ) ) {
+				$message = '';
+				if ( ! $form_post ) {
+					$message = sprintf( 
+						__( 'Contact form not found (ID: %d). Please select a different form or create a new one.', 'wpzoom-forms' ), 
+						$form_id 
+					);
+				} elseif ( 'wpzf-form' !== $form_post->post_type ) {
+					$message = sprintf( 
+						__( 'Invalid form type (ID: %d). Please select a valid WPZOOM form.', 'wpzoom-forms' ), 
+						$form_id 
+					);
+				} elseif ( 'trash' === $form_post->post_status ) {
+					$message = sprintf( 
+						__( 'Contact form "%s" is in trash (ID: %d). Please restore it or select a different form.', 'wpzoom-forms' ), 
+						$form_post->post_title, 
+						$form_id 
+					);
+				} else {
+					$message = sprintf( 
+						__( 'Contact form "%s" is not published (ID: %d). Please publish it or select a different form.', 'wpzoom-forms' ), 
+						$form_post->post_title, 
+						$form_id 
+					);
+				}
+				
+				return sprintf(
+					'<div class="wpzoom-forms-admin-notice" style="background: #fff; border: 1px solid #c3c4c7; border-left: 4px solid #d63638; box-shadow: 0 1px 1px rgba(0,0,0,0.04); padding: 1em 12px; margin: 1em 0;">
+						<p style="margin: 0; font-size: 14px; color: #d63638;">
+							<strong>%s:</strong> %s
+						</p>
+						<p style="margin: 8px 0 0 0; font-size: 13px; color: #646970;">
+							<a href="%s" target="_blank">%s</a>
+						</p>
+					</div>',
+					esc_html__( 'WPZOOM Forms Admin Notice', 'wpzoom-forms' ),
+					esc_html( $message ),
+					esc_url( admin_url( 'edit.php?post_type=wpzf-form' ) ),
+					esc_html__( 'Manage Forms', 'wpzoom-forms' )
+				);
+			}
+			
+			// Don't show anything to non-administrators
+			return '';
+		}
 
 		$align = isset( $attributes['align'] ) && ! empty( $attributes['align'] ) ? $attributes['align'] : 'none';
 
@@ -1663,6 +1744,17 @@ class WPZOOM_Forms {
 	}
 
 	/**
+	 * Render the contents of the upsell page in the admin.
+	 *
+	 * @access public
+	 * @return void
+	 * @since  1.0.0
+	 */
+	public function render_upsell_page() {
+		do_action( 'wpzoom_forms_admin_page_upsell' );
+	}
+
+	/**
 	 * Page header used on all admin pages.
 	 *
 	 * @access public
@@ -1673,7 +1765,7 @@ class WPZOOM_Forms {
 
 		$current_page = get_current_screen()->id;
 
-		if ( 'edit-wpzf-form' == $current_page || 'edit-wpzf-submission' == $current_page || 'wpzf-submission' == $current_page || 'wpzf-form_page_wpzf-settings' == $current_page ) {
+		if ( 'edit-wpzf-form' == $current_page || 'edit-wpzf-submission' == $current_page || 'wpzf-submission' == $current_page || 'wpzf-form_page_wpzf-settings' == $current_page || 'wpzf-form_page_wpzoom-forms-pro-license' == $current_page || 'wpzf-form_page_wpzf-upsell' == $current_page ) {
 			?>
 			<header class="wpzoom-new-admin-wrap wpzoom-new-admin_settings-header">
 				<h1 class="wpzoom-new-admin_settings-main-title wp-heading">
@@ -1681,14 +1773,21 @@ class WPZOOM_Forms {
 					echo apply_filters(
 						'wpzf_admin-header-title',
 						sprintf(
-							__( 'WPZOOM Forms <small>by <a href="%s" target="_blank" title="WPZOOM - WordPress themes with modern features and professional support">WPZOOM</a></small>', 'wpzoom-forms' ),
-							esc_url( 'https://www.wpzoom.com/' )
+							__( 'WPZOOM Forms <small>Lite</small>', 'wpzoom-forms' )
 						)
 					);
 					?>
 
 					<span class="wpzoom-new-admin_settings-main-title-version">
-						<?php printf( esc_html__( 'V. %s', 'wpzoom-forms' ), WPZOOM_FORMS_VERSION ); ?>
+						<?php 
+							echo apply_filters( 
+								'wpzf_admin-header-title-version', 
+								sprintf( 
+									esc_html__( 'v %s', 'wpzoom-forms' ),
+									WPZOOM_FORMS_VERSION 
+								) 
+							);
+						?>
 					</span>
 				</h1>
 
@@ -1710,6 +1809,10 @@ class WPZOOM_Forms {
 								'wpzf-form_page_wpzf-settings' => array(
 									'name' => esc_html__( 'Settings', 'wpzoom-forms' ),
 									'url'  => admin_url( 'edit.php?post_type=wpzf-form&page=wpzf-settings' ),
+								),
+								'wpzf-form_page_wpzf-upsell' => array(
+									'name' => esc_html__( 'Upgrade to PRO', 'wpzoom-forms' ),
+									'url'  => admin_url( 'edit.php?post_type=wpzf-form&page=wpzf-upsell' ),
 								),
 							)
 						);
@@ -2033,25 +2136,25 @@ class WPZOOM_Forms {
 	public function admin_page_footer() {
 		$current_page = get_current_screen()->id;
 
-		if ( 'edit-wpzf-form' == $current_page || 'wpzf-form' == $current_page || 'edit-wpzf-submission' == $current_page || 'wpzf-submission' == $current_page || 'wpzf-form_page_wpzf-settings' == $current_page ) {
+		if ( 'edit-wpzf-form' == $current_page || 'wpzf-form' == $current_page || 'edit-wpzf-submission' == $current_page || 'wpzf-submission' == $current_page || 'wpzf-form_page_wpzf-settings' == $current_page || 'wpzf-form_page_wpzoom-forms-pro-license' == $current_page || 'wpzf-form_page_wpzf-upsell' == $current_page ) {
 			?>
 			<footer class="wpzoom-new-admin_settings-footer">
 				<div class="wpzoom-new-admin_settings-footer-wrap">
 					<h3 class="wpzoom-new-admin_settings-footer-logo">
-						<a href="https://www.wpzoom.com/" target="_blank" title="<?php esc_html_e( 'WPZOOM - WordPress themes with modern features and professional support', 'wpzoom-forms' ); ?>">
+						<a href="https://www.wpzoom.com/<?php echo $this->utm_source; ?>" target="_blank" title="<?php esc_html_e( 'WPZOOM - WordPress themes with modern features and professional support', 'wpzoom-forms' ); ?>">
 							<?php _e( 'WPZOOM', 'wpzoom-forms' ); ?>
 						</a>
 					</h3>
 
 					<ul class="wpzoom-new-admin_settings-footer-links">
 						<li class="wpzoom-new-admin_settings-footer-links-themes">
-							<a href="https://www.wpzoom.com/themes/" target="_blank" title="<?php _e( 'Check out our themes', 'wpzoom-forms' ); ?>">
+							<a href="https://www.wpzoom.com/themes/<?php echo $this->utm_source; ?>" target="_blank" title="<?php _e( 'Check out our themes', 'wpzoom-forms' ); ?>">
 								<?php _e( 'Our Themes', 'wpzoom-forms' ); ?>
 							</a>
 						</li>
 
                         <li class="wpzoom-new-admin_settings-footer-links-themes">
-                            <a href="https://www.wpzoom.com/plugins/" target="_blank" title="<?php _e( 'Check out our plugins', 'wpzoom-forms' ); ?>">
+                            <a href="https://www.wpzoom.com/plugins/<?php echo $this->utm_source; ?>" target="_blank" title="<?php _e( 'Check out our plugins', 'wpzoom-forms' ); ?>">
                                 <?php _e( 'Our Plugins', 'wpzoom-forms' ); ?>
                             </a>
                         </li>
@@ -2083,7 +2186,7 @@ class WPZOOM_Forms {
 	public function admin_body_class_filter( $classes ) {
 		$current_page = get_current_screen()->id;
 
-		if ( 'edit-wpzf-form' == $current_page || 'wpzf-form' == $current_page || 'edit-wpzf-submission' == $current_page || 'wpzf-submission' == $current_page || 'wpzf-form_page_wpzf-settings' == $current_page ) {
+		if ( 'edit-wpzf-form' == $current_page || 'wpzf-form' == $current_page || 'edit-wpzf-submission' == $current_page || 'wpzf-submission' == $current_page || 'wpzf-form_page_wpzf-settings' == $current_page || 'wpzf-form_page_wpzoom-forms-pro-license' == $current_page || 'wpzf-form_page_wpzf-upsell' == $current_page ) {
 			$classes .= ' wpzoom-new-admin';
 		}
 
@@ -2394,7 +2497,7 @@ class WPZOOM_Forms {
 							}
 
 							$email_body .= '<strong>' . wp_kses_post( wp_unslash( $name ) ) . ':</strong><br/>' . nl2br( wp_kses_post( wp_unslash( $value ) ) ) . '<br/><br/>';
-							$raw_content['_wpzf_fields'][ $name ] = sanitize_text_field( $value );
+							$raw_content['_wpzf_fields'][ $name ] = sanitize_textarea_field( $value );
 						}
 					}
 
@@ -2464,7 +2567,7 @@ class WPZOOM_Forms {
 								continue;
 							}
 
-							$content['_wpzf_fields'][ $name ] = sanitize_text_field( $value );
+							$content['_wpzf_fields'][ $name ] = sanitize_textarea_field( $value );
 						}
 					}
 
@@ -2570,6 +2673,7 @@ if( ! function_exists ( 'wpzoom_forms_load_files' ) ) {
 		require_once 'classes/class-wpzoom-forms-settings-fields.php';
 		require_once 'classes/class-wpzoom-forms-settings-page.php';
 		require_once 'classes/class-wpzoom-forms-template-manager.php';
+		require_once 'classes/class-wpzoom-forms-settings-upsell.php';
 	
 	}
 	add_action( 'plugin_loaded', 'wpzoom_forms_load_files' );
