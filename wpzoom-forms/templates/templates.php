@@ -73,7 +73,7 @@ $templates = array(
 <!-- wp:columns {"style":{"spacing":{"blockGap":{"top":"0","left":"var:preset|spacing|40"}}}} -->
 <div class="wp-block-columns"><!-- wp:column {"width":"","style":{"spacing":{"padding":{"right":"var:preset|spacing|40"}}}} -->
 <div class="wp-block-column" style="padding-right:var(--wp--preset--spacing--40)"><!-- wp:wpzoom-forms/text-name-field {"id":"input_name","name":"First","label":"First","style":{"spacing":{"margin":{"left":"0px"}}}} -->
-<label for="input_name"><span>First</span><sup class="wp-block-wpzoom-forms-required">*</sup></label><input type="text" name="input_name" id="input_name" placeholder="" required class="wp-block-wpzoom-forms-text-name-field"/>
+<label for="input_name"><span>First</span><sup class="wp-block-wpzoom-forms-required">*</sup></label><input type="text" name="input_name" id="input_name" placeholder="" required class="wp-block-wpzoom-forms-text-name-field" style="margin-left:0px"/>
 <!-- /wp:wpzoom-forms/text-name-field --></div>
 <!-- /wp:column -->
 
@@ -357,7 +357,25 @@ $templates = array(
 		'desc'    => 'Collect customer support inquiries or technical issues with structured ticket details.',
 		'content' => '',
 		'is_pro'  => true,
-	)
+	),
+	array(
+		'id'       => 'volunteer-application',
+		'name'     => 'Volunteer Application',
+		'category' => 'nonprofit',
+		'icon'     => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" stroke-width="1.5"/></svg>',
+		'desc'     => 'Collect volunteer applications for your organization with a simple form.',
+		'content'  => '',
+		'is_pro'  => true,
+	),
+	array(
+		'id'       => 'wholesale-inquiry',
+		'name'     => 'Wholesale Inquiry',
+		'category' => 'ecommerce',
+		'icon'     => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" stroke-width="1.5"/></svg>',
+		'desc'     => 'Collect wholesale and bulk order inquiries from businesses and resellers.',
+		'content'  => '',
+		'is_pro'  => true,
+	),
 
 );
 

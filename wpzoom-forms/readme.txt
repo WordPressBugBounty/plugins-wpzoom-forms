@@ -4,23 +4,26 @@ Donate link:       http://paypal.me/wpzm/10usd
 Author URI:        https://www.wpzoom.com/
 Requires at least: 6.0
 Requires PHP:      7.4
-Tested up to:      6.8
-Stable tag:        1.3.3
+Tested up to:      6.9
+Stable tag:        1.3.6
 License:           GNU General Public License v2
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
-Tags:              contact, form, contact form, form builder, custom form
+Tags:              contact form, form builder, gutenberg form, contact form block, forms
 
-**WPZOOM Forms** is a simple, user-friendly contact form plugin for WordPress that utilizes Gutenberg blocks for easy form building and customization.
+Contact form plugin for WordPress - Build beautiful forms with Gutenberg blocks. Drag & drop form builder with spam protection, email notifications & submissions management.
 
 
 == Description ==
-[WPZOOM Forms](https://www.wpzoom.com/plugins/wpzoom-forms/) is a powerful yet intuitive contact form plugin for WordPress that seamlessly integrates with the Gutenberg editor. Create beautiful, responsive forms in minutes using our drag-and-drop interface – no coding required.
 
-Trusted by over 10,000 active websites, WPZOOM Forms combines ease of use with professional functionality, making it perfect for beginners and advanced users alike. Whether you need simple contact forms, complex multi-step forms, or specialized booking systems, WPZOOM Forms delivers the flexibility and reliability your website deserves.
+= Contact Form Builder for Gutenberg - Simple & Powerful =
+
+**The best contact form plugin for WordPress block editor.** Create beautiful, responsive contact forms using Gutenberg blocks. Drag & drop form builder with spam protection - no coding required.
+
+[WPZOOM Forms](https://www.wpzoom.com/plugins/wpzoom-forms/) is trusted by over 10,000 active websites. Perfect for contact forms, feedback forms, appointment booking, and more.
 
 ###💪 Want More Power? Try WPZOOM Forms PRO
 
-Take your forms to the professional level with [**WPZOOM Forms PRO**](https://www.wpzoom.com/plugins/wpzoom-forms/). Get advanced features like custom email notifications with visual editor, AJAX submissions for seamless user experience, and file upload capabilities for documents and images. Perfect for businesses that need more than basic contact forms.
+Take your forms to the professional level with [**WPZOOM Forms PRO**](https://www.wpzoom.com/plugins/wpzoom-forms/). Generate forms instantly with AI, connect to Mailchimp for email marketing, accept file uploads, enable AJAX submissions, and customize email notifications with a visual editor. Perfect for businesses that need more than basic contact forms.
 
 ⭐️ **[Get the PRO version!](https://www.wpzoom.com/plugins/wpzoom-forms/?utm_source=wporg&utm_medium=website&utm_campaign=free_description)** ⭐️
 
@@ -68,6 +71,14 @@ All form submissions are safely stored in your WordPress dashboard. Search, filt
 
 ### 🌟 PRO Features Include:
 
+**🤖 AI Form Generator**
+
+Describe your form in plain language and let AI create it for you. Skip the manual setup – just type what you need and get a fully configured form in seconds.
+
+**📧 Mailchimp Integration**
+
+Automatically add form submissions to your Mailchimp audiences. Build newsletter signup forms or connect any form to your email marketing lists with just a few clicks.
+
 **Custom Email Notifications**
 
 Design beautiful, branded notification emails with our visual editor. Add dynamic field tags, customize layouts, and create professional emails that match your brand. No more generic, plain-text notifications.
@@ -84,6 +95,34 @@ Accept PDF documents and images directly through your forms. Perfect for:
 - Project briefs and client documentation
 - Media submissions and portfolios
 - Support ticket attachments
+
+**🕐 Time Picker Field**
+
+Add time selection to your forms with a customizable time picker. Supports 12-hour and 24-hour formats with configurable minute intervals – ideal for appointment and booking forms.
+
+**🔒 GDPR Consent Field**
+
+Stay compliant with privacy regulations by adding a GDPR consent checkbox to your forms. Customize the consent text and link to your privacy policy.
+
+**🔗 Hidden Fields**
+
+Capture UTM parameters, referrer data, and other metadata automatically. Track where your leads are coming from without cluttering the form.
+
+**📥 Import & Export Forms**
+
+Transfer forms between websites or create backups with JSON-based import/export. Keep your forms safe and portable across multiple WordPress installations.
+
+**📊 Export Submissions to CSV**
+
+Download your form submissions as CSV files for reporting, analysis, or migration to other tools.
+
+**📋 Duplicate Forms**
+
+Clone any existing form with one click. Quickly create variations of your forms without starting from scratch.
+
+**🔀 Conditional Logic**
+
+Create dynamic forms that adapt based on user input. Show or hide fields depending on previous answers to create personalized form experiences.
 
 **Love WPZOOM Forms?** Help other WordPress users discover this plugin by [leaving a 5-star review](https://wordpress.org/support/plugin/wpzoom-forms/reviews/#new-post). Your feedback helps us continue improving and adding new features for the community.
 
@@ -137,6 +176,18 @@ To export form submissions, navigate to the Tools > Export page in Dashboard and
 
 
 == Changelog ==
+
+= 1.3.6 =
+* Multiple bug fixes and improvements
+
+= 1.3.5 =
+* Improved template modal UI
+* Refactored the Form Block editor component for better maintainability
+* Improved block styling with currentColor for better theme compatibility
+* Multiple UI improvemens
+
+= 1.3.4 =
+* Minor bug fix
 
 = 1.3.3 =
 * Bug fix with default form
