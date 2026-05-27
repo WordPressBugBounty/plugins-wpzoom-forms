@@ -113,8 +113,7 @@ class WPZOOM_Forms_Renderer {
 		endif;
 		?>
 		<div id="<?php echo esc_attr( $form_uid ); ?>" class="wpzf-form wpzoom-forms_form<?php echo esc_attr( $theme_class ); ?><?php echo esc_attr( $layout_class ); ?><?php echo esc_attr( $extra_class ); ?> wpzf-labels-<?php echo esc_attr( $settings['labelsPosition'] ); ?>">
-			<div id="<?php echo esc_attr( $notice_id ); ?>" class="wpzf-notice"<?php if ( $notice_status ) : ?> data-status="<?php echo esc_attr( $notice_status ); ?>"<?php else : ?> hidden<?php endif; ?>><?php echo esc_html( $notice_text ); ?></div>
-			<form method="POST" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="wpzf-form__inner wp-block-wpzoom-forms-form" data-form-id="<?php echo esc_attr( $form_id ); ?>" data-success="<?php echo esc_attr( $success_msg ); ?>" data-failure="<?php echo esc_attr( $failure_msg ); ?>" novalidate<?php if ( 'success' === $notice_status ) echo ' hidden'; ?>>
+			<form method="POST" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="wpzf-form__inner wp-block-wpzoom-forms-form" data-form-id="<?php echo esc_attr( $form_id ); ?>" data-success="<?php echo esc_attr( $success_msg ); ?>" data-failure="<?php echo esc_attr( $failure_msg ); ?>">
 				<input type="hidden" name="action" value="wpzf_submit" />
 				<input type="hidden" name="form_id" value="<?php echo esc_attr( $form_id ); ?>" />
 				<?php wp_nonce_field( 'wpzf_submit' ); ?>
@@ -137,6 +136,7 @@ class WPZOOM_Forms_Renderer {
 					<button type="submit" class="wpzf-submit__btn"><?php echo esc_html( $settings['submitLabel'] ); ?></button>
 				</div>
 			</form>
+			<div id="<?php echo esc_attr( $notice_id ); ?>" class="wpzf-notice" style="margin-top:1em;"<?php if ( $notice_status ) : ?> data-status="<?php echo esc_attr( $notice_status ); ?>"<?php else : ?> hidden<?php endif; ?>><?php echo esc_html( $notice_text ); ?></div>
 		</div>
 		<?php
 		return ob_get_clean();
@@ -255,10 +255,22 @@ class WPZOOM_Forms_Renderer {
 				);
 				break;
 			case 'date':
+				// Use flatpickr (same as legacy forms) instead of the native date
+				// input, so the picker looks consistent across the site and honours
+				// the configured format/mode. datepicker.js initialises any
+				// input[data-datepicker="true"] and reads data-date-format/data-mode.
+				$fmt  = ! empty( $field['format'] ) ? $field['format'] : 'Y-m-d';
+				$mode = ! empty( $field['mode'] )   ? $field['mode']   : 'single';
+				$date_ph = '' !== $placeholder ? $placeholder : ' placeholder="' . esc_attr( $fmt ) . '"';
 				$input_html = sprintf(
-					'<input type="date" id="%1$s" name="%2$s" class="wpzf-input"%3$s%4$s value="%5$s" />',
-					esc_attr( $field_id ), esc_attr( $field_name ), $required_attr, $placeholder, esc_attr( $default )
+					'<input type="text" id="%1$s" name="%2$s" class="wpzf-input" data-datepicker="true" data-date-format="%3$s" data-mode="%4$s" autocomplete="off"%5$s%6$s value="%7$s" />',
+					esc_attr( $field_id ), esc_attr( $field_name ), esc_attr( $fmt ), esc_attr( $mode ), $required_attr, $date_ph, esc_attr( $default )
 				);
+				// Ensure the datepicker assets load (registered in_footer, so a late
+				// enqueue during render still prints correctly).
+				wp_enqueue_style( 'wpzoom-forms-css-frontend-flatpickr' );
+				wp_enqueue_script( 'wpzoom-forms-js-frontend-flatpickr' );
+				wp_enqueue_script( 'wpzoom-forms-js-frontend-datepicker' );
 				break;
 			case 'select':
 				$opts = isset( $field['options'] ) ? $field['options'] : array();
